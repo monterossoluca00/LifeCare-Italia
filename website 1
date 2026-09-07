@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#061322" />
+  <title>LifeCare Medical Flight — Safe journey, expert care</title>
+  <meta name="description" content="Rimpatri sanitari e trasferimenti a medio-lungo raggio con assistenza medica dedicata." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./src/style.css" />
+</head>
+<body>
+  <div class="scene" id="scene">
+    <canvas id="webgl"></canvas>
+    <div class="grain"></div>
+    <div class="vignette"></div>
+
+    <header class="nav">
+      <a class="brand" href="#" aria-label="LifeCare Medical Flight">
+        <span class="brand-mark"><i></i><i></i><i></i></span>
+        <span class="brand-text"><strong>LifeCare</strong><small>MEDICAL FLIGHT</small></span>
+      </a>
+      <div class="nav-right">
+        <span class="nav-pulse"><span></span> Medical assistance worldwide</span>
+        <a class="nav-link" href="#services">Servizi</a>
+        <a class="nav-cta" href="#contact">Richiedi assistenza <span>↗</span></a>
+      </div>
+    </header>
+
+    <main class="hero">
+      <div class="hero-copy" id="heroCopy">
+        <div class="eyebrow"><span></span> Rimpatri sanitari · Trasferimenti a medio-lungo raggio</div>
+        <h1>La sicurezza<br><em>viaggia con te.</em></h1>
+        <p>Assistenza sanitaria dedicata durante il viaggio, anche a bordo di voli di linea. Comfort, privacy e competenza per i pazienti più fragili.</p>
+        <div class="hero-actions">
+          <a class="primary" href="#contact">Parla con un coordinatore <span>↗</span></a>
+          <a class="secondary" href="#services">Scopri come operiamo <span>↓</span></a>
+        </div>
+      </div>
+
+      <div class="story-card" id="storyCard">
+        <div class="story-top"><span>01</span><span>SAFE JOURNEY</span></div>
+        <div class="story-line"></div>
+        <p>Il tuo viaggio può essere un normale volo di linea. L'assistenza intorno al paziente, invece, è tutto fuorché ordinaria.</p>
+        <div class="story-foot"><span>MEDICO + INFERMIERE</span><span>BARELLA AERONAUTICA</span></div>
+      </div>
+
+      <div class="journey-progress" aria-hidden="true"><span></span></div>
+      <div class="hint" id="hint"><span class="mouse"><i></i></span><span>Scorri per entrare a bordo</span></div>
+
+      <section class="services" id="services">
+        <div class="service"><small>01</small><strong>Rimpatri sanitari</strong><span>Rientri protetti dopo infortuni e ricoveri.</span></div>
+        <div class="service"><small>02</small><strong>Trasferimenti</strong><span>Medio-lungo raggio con assistenza dedicata.</span></div>
+        <div class="service"><small>03</small><strong>Configurazione su misura</strong><span>Medico, infermiere o assistente secondo necessità.</span></div>
+      </section>
+
+      <section class="contact-panel" id="contact">
+        <div><small>NEED MEDICAL ASSISTANCE?</small><h2>Parliamo del viaggio.</h2></div>
+        <a class="primary" href="mailto:info@lifecaremedicalflight.com">Contatta LifeCare <span>↗</span></a>
+      </section>
+    </main>
+
+    <div class="status-bar"><span id="phaseLabel">CABIN READY</span><span>01 — 03</span></div>
+  </div>
+
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>
