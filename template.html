@@ -1,0 +1,692 @@
+<title>LifeCare Italia — Rimpatri e voli sanitari con barella</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@300;400;600&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ink:#050A14;
+  --ink-2:#0A1526;
+  --navy:#0A2A5E;
+  --navy-soft:#12305F;
+  --blue:#2E6BE0;
+  --sky:#8FB8F2;
+  --vital:#4FD1E0;
+  --paper:#EEF3FA;
+  --mute:#8B9CB8;
+  --line:rgba(143,184,242,.16);
+  --serif:"Spectral",Georgia,"Times New Roman",serif;
+  --sans:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+  --mono:"IBM Plex Mono","SF Mono",Menlo,monospace;
+  --wrap:1180px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--paper);font-family:var(--sans);font-weight:400;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,h3{font-family:var(--serif);font-weight:400;text-wrap:balance;margin:0;letter-spacing:-.01em}
+p{margin:0}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--vital);outline-offset:3px;border-radius:2px}
+
+/* ---------- LOADER ---------- */
+#loader{position:fixed;inset:0;z-index:999;background:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;transition:opacity .9s ease,visibility .9s}
+#loader.gone{opacity:0;visibility:hidden}
+.ld-mark{font-family:var(--serif);font-size:clamp(30px,5vw,50px);letter-spacing:.01em}
+.ld-mark b{font-weight:600;color:var(--blue)}
+.ld-mark span{color:var(--paper);font-weight:300}
+.ld-sub{font-family:var(--mono);font-size:12px;letter-spacing:.34em;text-transform:uppercase;color:var(--mute)}
+.ld-rail{width:min(300px,62vw);height:2px;background:rgba(143,184,242,.14);overflow:hidden}
+.ld-fill{height:100%;width:0;background:var(--vital);transition:width .25s linear}
+.ld-pct{font-family:var(--mono);font-size:13px;color:var(--mute);letter-spacing:.16em;font-variant-numeric:tabular-nums}
+
+/* ---------- HEADER ---------- */
+header{position:fixed;top:0;left:0;right:0;z-index:80;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:20px clamp(18px,4vw,44px);transition:background .4s ease,backdrop-filter .4s ease,border-color .4s ease;border-bottom:1px solid transparent}
+header.solid{background:rgba(5,10,20,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom-color:var(--line)}
+.logo{font-family:var(--serif);font-size:21px;letter-spacing:.01em;text-decoration:none;white-space:nowrap}
+.logo b{font-weight:600;color:var(--blue)}
+.logo i{font-style:normal;font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--mute);display:block;margin-top:3px}
+nav{display:flex;align-items:center;gap:clamp(16px,2.6vw,34px)}
+nav a{font-size:15px;letter-spacing:.04em;color:var(--sky);text-decoration:none;transition:color .25s}
+nav a:hover{color:var(--paper)}
+.cta{font-family:var(--sans);font-size:14.5px;font-weight:500;letter-spacing:.04em;padding:12px 22px;border:1px solid var(--blue);color:var(--paper);text-decoration:none;background:rgba(46,107,224,.12);transition:background .25s,border-color .25s}
+.cta:hover{background:var(--blue);border-color:var(--blue)}
+@media(max-width:820px){nav a:not(.cta){display:none}}
+
+/* ---------- SCROLL CANVAS ---------- */
+#film{position:relative;height:760vh}
+.pin{position:sticky;top:0;height:100vh;overflow:hidden;background:var(--ink)}
+#seq{display:block;width:100%;height:100%}
+.vignette{position:absolute;inset:0;pointer-events:none;background:
+  linear-gradient(to bottom,rgba(5,10,20,.72) 0%,rgba(5,10,20,0) 26%,rgba(5,10,20,0) 58%,rgba(5,10,20,.86) 100%),
+  radial-gradient(120% 80% at 50% 50%,rgba(5,10,20,0) 42%,rgba(5,10,20,.55) 100%)}
+.cap{position:absolute;z-index:3;max-width:min(560px,84vw);opacity:0;will-change:opacity,transform;pointer-events:none;padding:38px 46px;text-shadow:0 1px 3px rgba(2,6,14,.95),0 2px 18px rgba(2,6,14,.9),0 4px 44px rgba(2,6,14,.8);background:radial-gradient(ellipse 80% 78% at 50% 50%,rgba(2,6,14,.86) 0%,rgba(2,6,14,.72) 40%,rgba(2,6,14,.34) 66%,rgba(2,6,14,0) 84%)}
+.cap .eyebrow{font-family:var(--mono);font-size:clamp(17.5px,1.9vw,23px);font-weight:500;letter-spacing:.15em;word-spacing:.3em;line-height:1.75;text-transform:uppercase;color:#93EAF5;text-shadow:0 1px 3px rgba(2,6,14,.98),0 2px 16px rgba(2,6,14,.95);margin-bottom:20px}
+.cap:not(.center) .eyebrow{font-size:clamp(20px,2.2vw,27px);letter-spacing:.12em;word-spacing:.24em;line-height:1.6;margin-bottom:20px}
+.cap h2{font-size:clamp(30px,4.5vw,56px);line-height:1.12}
+.cap h1{font-size:clamp(30px,4.9vw,66px);line-height:1.08;letter-spacing:-.015em}
+.cap p{margin-top:19px;font-size:clamp(19.5px,2vw,25px);line-height:1.66;color:#F5F9FE;max-width:42ch;font-weight:400}
+.cap.center{left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;width:min(820px,92vw);max-width:none}
+.cap.center p{margin-left:auto;margin-right:auto}
+.cap.left{left:clamp(4px,5vw,86px);top:50%;transform:translateY(-50%)}
+.cap.right{right:clamp(4px,5vw,86px);top:50%;transform:translateY(-50%);text-align:right}
+.cap.right p{margin-left:auto}
+.cap.low{left:50%;bottom:clamp(90px,14vh,150px);transform:translateX(-50%);text-align:center;width:min(640px,86vw);max-width:none}
+.cap.low p{margin-left:auto;margin-right:auto}
+@media(max-width:760px){
+  .cap.left,.cap.right{left:24px;right:24px;text-align:left;max-width:none}
+  .cap.right p{margin-left:0}
+  .cap .eyebrow{font-size:17.5px;letter-spacing:.09em;word-spacing:.2em;line-height:1.7;margin-bottom:16px}
+  .cap:not(.center) .eyebrow{font-size:20px;letter-spacing:.07em;word-spacing:.18em;line-height:1.55;margin-bottom:16px}
+  .cap{padding:30px 24px}
+  .cap h1{font-size:clamp(28px,7.6vw,42px)}
+  .cap p{font-size:21px;line-height:1.66;max-width:none}
+}
+.hint{position:absolute;left:50%;bottom:clamp(26px,5vh,46px);transform:translateX(-50%);z-index:4;font-family:var(--mono);font-size:14.5px;font-weight:500;letter-spacing:.38em;text-indent:.42em;text-transform:uppercase;color:#F0F6FF;text-shadow:0 1px 4px rgba(2,6,14,.95),0 2px 18px rgba(2,6,14,.9);display:flex;flex-direction:column;align-items:center;gap:13px;transition:opacity .5s}
+.hint .word{padding:7px 16px;border:1px solid rgba(143,184,242,.34);border-radius:999px;background:rgba(3,8,18,.42)}
+.hint .bar{width:2px;height:56px;position:relative;overflow:hidden;background:linear-gradient(to bottom,rgba(79,209,224,.28),rgba(79,209,224,0))}
+.hint .bar::after{content:"";position:absolute;left:0;width:100%;height:20px;background:linear-gradient(to bottom,rgba(79,209,224,0),var(--vital));animation:hintdrop 2.1s cubic-bezier(.5,0,.5,1) infinite}
+@keyframes hintdrop{0%{top:-22px}70%,100%{top:56px}}
+.hint .chev{width:26px;height:15px;color:var(--vital);margin-top:-4px;animation:hintnudge 2.1s ease-in-out infinite;filter:drop-shadow(0 1px 8px rgba(2,6,14,.9))}
+@keyframes hintnudge{0%,55%,100%{transform:translateY(0);opacity:.55}75%{transform:translateY(5px);opacity:1}}
+@media(prefers-reduced-motion:reduce){
+  .hint .bar::after{animation:none;top:36px}
+  .hint .chev{animation:none;opacity:1}
+}
+/* vertical scroll progress */
+.vprog{position:fixed;right:26px;top:50%;transform:translateY(-50%);z-index:70;display:flex;flex-direction:column;align-items:center;gap:12px;opacity:0;transition:opacity .4s}
+.vprog.on{opacity:1}
+.vprog .rail{width:2px;height:150px;background:rgba(143,184,242,.16);position:relative}
+.vprog .fill{position:absolute;top:0;left:0;width:100%;height:0;background:var(--vital)}
+.vprog .num{font-family:var(--mono);font-size:12px;color:var(--mute);letter-spacing:.1em;font-variant-numeric:tabular-nums}
+@media(max-width:1000px){.vprog{display:none}}
+
+/* ---------- ECG DIVIDER ---------- */
+.ecg{display:block;width:100%;height:56px;background:var(--ink)}
+.ecg polyline{fill:none;stroke:var(--vital);stroke-width:1.4;opacity:.85;stroke-dasharray:1400;stroke-dashoffset:1400;animation:trace 6s linear infinite}
+@keyframes trace{to{stroke-dashoffset:-1400}}
+@media(prefers-reduced-motion:reduce){.ecg polyline{animation:none;stroke-dashoffset:0}}
+
+/* ---------- GENERIC SECTIONS ---------- */
+main{position:relative;z-index:5;background:var(--ink)}
+section{padding:clamp(50px,7vh,84px) clamp(20px,5vw,44px)}
+section[id],footer[id]{scroll-margin-top:96px}
+@media(max-width:520px){section[id],footer[id]{scroll-margin-top:78px}}
+.wrap{max-width:var(--wrap);margin:0 auto}
+.kicker{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--vital);margin-bottom:14px}
+.lead{font-size:clamp(30px,3.8vw,46px);line-height:1.18;max-width:20ch}
+.sub{margin-top:16px;font-size:19px;line-height:1.72;color:#C9D6E8;max-width:58ch}
+
+/* full-bleed band image */
+.band{margin:0;position:relative;width:100%;height:clamp(300px,58vh,620px);overflow:hidden;background:var(--ink)}
+.band img{width:100%;height:100%;object-fit:cover;display:block}
+.band::after{content:"";position:absolute;inset:0;pointer-events:none;background:
+  linear-gradient(to bottom,rgba(5,10,20,.4) 0%,rgba(5,10,20,0) 16%,rgba(5,10,20,0) 84%,rgba(5,10,20,.4) 100%)}
+
+/* process — a real sequence, so it is numbered */
+.steps{margin-top:38px;display:flex;flex-direction:column}
+.step{display:grid;grid-template-columns:76px 1fr;gap:clamp(18px,4vw,52px);padding:24px 0;border-top:1px solid var(--line);align-items:start}
+.step:last-child{border-bottom:1px solid var(--line)}
+.step .n{font-family:var(--mono);font-size:14px;color:var(--blue);letter-spacing:.14em;padding-top:6px;font-variant-numeric:tabular-nums}
+.step h3{font-size:clamp(22px,2.5vw,29px);line-height:1.26}
+.step p{margin-top:11px;font-size:17.5px;line-height:1.74;color:#C9D6E8;max-width:60ch}
+@media(max-width:620px){.step{grid-template-columns:1fr;gap:6px}}
+
+/* services */
+.cards{margin-top:38px;display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--line)}
+.card{background:var(--ink-2);display:flex;flex-direction:column}
+.card figure{margin:0;aspect-ratio:3/2;overflow:hidden;position:relative;background:var(--navy)}
+.card img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.94)}
+.card figcaption{position:absolute;left:0;bottom:0;right:0;padding:26px 22px 15px;background:linear-gradient(to top,rgba(5,10,20,.97) 0%,rgba(5,10,20,.82) 40%,rgba(5,10,20,0) 100%);text-shadow:0 1px 6px rgba(3,8,18,.9);font-family:var(--mono);font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--vital)}
+.card .body{padding:26px 22px 30px;display:flex;flex-direction:column;gap:12px;flex:1}
+.card h3{font-size:26px;line-height:1.22}
+.card p{font-size:17px;line-height:1.72;color:#C9D6E8}
+@media(max-width:900px){.cards{grid-template-columns:1fr}.card figure{aspect-ratio:16/9}}
+
+/* faq */
+.faq{margin-top:36px;display:grid;grid-template-columns:repeat(2,1fr);gap:0 clamp(28px,5vw,64px)}
+.fq{padding:24px 0;border-top:1px solid var(--line)}
+.fq h3{font-size:clamp(21px,2.2vw,26px);line-height:1.3}
+.fq p{margin-top:12px;font-size:17.5px;line-height:1.74;color:#C9D6E8;max-width:50ch}
+@media(max-width:820px){.faq{grid-template-columns:1fr}}
+
+/* footer */
+footer{background:var(--ink-2);border-top:1px solid var(--line);padding:clamp(50px,7vh,80px) clamp(20px,5vw,44px) 34px}
+.pgrid{display:grid;grid-template-columns:1fr 1.02fr;gap:clamp(34px,6vw,76px);align-items:center}
+.pgrid .sub{max-width:44ch}
+@media(max-width:900px){.pgrid{grid-template-columns:1fr;gap:30px;align-items:start}}
+.fgrid{max-width:var(--wrap);margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:clamp(30px,6vw,76px);align-items:start}
+.fcontact{padding-top:6px}
+@media(max-width:860px){.fgrid{grid-template-columns:1fr;gap:28px}.fcontact{padding-top:0}}
+.fgrid h2{font-size:clamp(28px,3.3vw,40px);line-height:1.18}
+.fgrid .sub{margin-top:16px}
+.contactlist{margin-top:26px;display:flex;flex-direction:column;gap:11px;font-family:var(--mono);font-size:15px;color:#C9D6E8}
+.contactlist a{color:var(--sky);text-decoration:none}
+.contactlist a:hover{color:var(--paper)}
+
+/* contact buttons */
+.ctarow{margin-top:30px;display:flex;flex-wrap:wrap;gap:12px}
+.ctarow a{display:inline-flex;align-items:center;gap:10px;text-decoration:none;font-family:var(--sans);font-size:17px;font-weight:500;letter-spacing:.01em;padding:16px 24px;border:1px solid transparent;transition:background .25s,border-color .25s,color .25s}
+.ctarow svg{width:20px;height:20px;flex:none}
+.btn-primary{background:var(--blue);color:#fff;border-color:var(--blue);font-variant-numeric:tabular-nums}
+.btn-primary svg{fill:#fff}
+.btn-primary:hover{background:#1F58C9;border-color:#1F58C9}
+.btn-ghost{background:transparent;color:var(--paper);border-color:rgba(143,184,242,.34)}
+.btn-ghost svg{fill:var(--sky)}
+.btn-ghost:hover{border-color:var(--sky);background:rgba(143,184,242,.08)}
+
+/* ---- quote card (light instrument panel) ---- */
+.qwrap{position:relative;padding-top:16px}
+.qbadge{position:absolute;top:0;right:6px;z-index:2;width:76px;height:76px;border-radius:22px;background:linear-gradient(160deg,#3D77E8,#2154C4);display:flex;align-items:center;justify-content:center;box-shadow:0 14px 30px rgba(11,30,70,.5)}
+.qbadge svg{width:34px;height:34px;fill:#fff}
+.qcard{background:#F1F3F6;border-radius:22px;padding:clamp(26px,3.4vw,38px);box-shadow:0 24px 60px rgba(2,7,18,.55)}
+.qcard h3{font-family:var(--sans);font-weight:600;font-size:clamp(28px,3.1vw,35px);color:#141A26;letter-spacing:-.02em;line-height:1.15}
+.qsub{margin-top:9px;font-size:18px;color:#4E5A6B;font-weight:400}
+.qsub b{color:var(--blue);font-weight:600}
+.qcard form{margin-top:26px;display:flex;flex-direction:column;gap:16px}
+.qfield{display:flex;flex-direction:column;min-width:0}
+.qcard label{font-family:var(--sans);font-size:13.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#37414F;margin-bottom:8px}
+.qinput{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #E1E5EB;border-radius:12px;padding:0 14px;transition:border-color .2s,box-shadow .2s}
+.qinput:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(46,107,224,.16)}
+.qicon{width:21px;height:21px;flex:none}
+.qicon.blue{fill:var(--blue)}
+.qicon.green{fill:#1FA463}
+.qcard input{flex:1;min-width:0;width:100%;background:transparent;border:0;outline:none;font-family:var(--sans);font-size:17.5px;font-weight:400;color:#141A26;padding:16px 0}
+.qcard input::placeholder{color:#798496}
+.qrow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:400px){.qrow{grid-template-columns:1fr}}
+.qcard button{margin-top:6px;width:100%;font-family:var(--sans);font-size:19px;font-weight:600;letter-spacing:.01em;padding:21px 24px;background:#141A26;color:#fff;border:0;border-radius:12px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:12px;transition:background .25s}
+.qcard button:hover{background:#232D40}
+.qnote{font-family:var(--mono);font-size:12.5px;line-height:1.7;color:#59626F}
+.fbottom{max-width:var(--wrap);margin:40px auto 0;padding-top:22px;border-top:1px solid var(--line);font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:#8395AE;text-transform:uppercase}
+
+/* ---- corpi di lettura su mobile: solo il contenuto, i contatti restano com'erano ---- */
+@media(max-width:760px){
+  main .kicker{font-size:13px;letter-spacing:.24em;margin-bottom:12px}
+  main .lead{font-size:clamp(32px,8.2vw,40px);line-height:1.2;max-width:none}
+  main .sub{font-size:20px;line-height:1.75;max-width:none}
+  .step{padding:26px 0}
+  .step .n{font-size:13px;padding-top:2px}
+  .step h3{font-size:26px;line-height:1.28}
+  .step p{margin-top:13px;font-size:19.5px;line-height:1.72;max-width:none}
+  .card .body{padding:24px 22px 30px;gap:13px}
+  .card h3{font-size:28px}
+  .card p{font-size:19px;line-height:1.72}
+  .card figcaption{font-size:12.5px;letter-spacing:.2em}
+  .fq{padding:26px 0}
+  .fq h3{font-size:25px;line-height:1.28}
+  .fq p{margin-top:13px;font-size:19.5px;line-height:1.74;max-width:none}
+  /* il badge calcolatrice non deve coprire il titolo su schermi stretti */
+  .fgrid h2{font-size:clamp(28px,7.8vw,36px)}
+  .contactlist{font-size:16px;gap:12px}
+  .ctarow{gap:11px}
+  .ctarow a{font-size:18px;padding:17px 22px;width:100%;justify-content:center}
+  .qcard h3{font-size:29px}
+  .qsub{font-size:19px}
+  .qcard label{font-size:14px}
+  .qcard input{font-size:18px;padding:17px 0}
+  .qcard button{font-size:20px;padding:22px 24px}
+  .qnote{font-size:13px}
+  .fbottom{font-size:12.5px}
+  .qwrap{padding-top:38px}
+  .qbadge{width:62px;height:62px;border-radius:18px}
+  .qbadge svg{width:28px;height:28px}
+}
+
+@media(max-width:520px){
+  header{padding:14px 16px;gap:10px}
+  .logo{font-size:17.5px}
+  .logo i{font-size:9px;letter-spacing:.18em;margin-top:2px}
+  .cta{font-size:13.5px;padding:11px 14px;letter-spacing:0}
+}
+</style>
+
+<div id="loader">
+  <div class="ld-mark"><b>LifeCare</b> <span>Italia</span></div>
+  <div class="ld-sub">Medical Flight</div>
+  <div class="ld-rail"><div class="ld-fill" id="ldFill"></div></div>
+  <div class="ld-pct" id="ldPct">00%</div>
+</div>
+
+<header id="hdr">
+  <a class="logo" href="#film"><b>LifeCare</b> Italia<i>Medical Flight</i></a>
+  <nav>
+    <a href="#percorso">Come funziona</a>
+    <a href="#servizi">Servizi</a>
+    <a href="#contatti">Contatti</a>
+    <a class="cta" href="#preventivo">Richiedi un preventivo</a>
+  </nav>
+</header>
+
+<div class="vprog" id="vprog">
+  <div class="num" id="vnum">01</div>
+  <div class="rail"><div class="fill" id="vfill"></div></div>
+  <div class="num">06</div>
+</div>
+
+<div id="film">
+  <div class="pin">
+    <canvas id="seq"></canvas>
+    <div class="vignette"></div>
+
+    <div class="cap center" id="c1" style="opacity:1">
+      <div class="eyebrow">Voli sanitari&nbsp;&nbsp; Rimpatri&nbsp;&nbsp; Trasferimenti</div>
+      <h1>Ci prendiamo cura dei tuoi cari fino a casa.</h1>
+      <p>Trasporto sanitario su voli di linea, con barella aeronautica ed équipe medica a bordo. Ovunque si trovino nel mondo.</p>
+    </div>
+
+    <div class="cap left" id="c2">
+      <div class="eyebrow">Rete di linea</div>
+      <h2>Non serve un aereo privato per volare in sicurezza</h2>
+      <p>Usiamo i voli di linea già programmati: più rotte disponibili, tempi di partenza più rapidi, costi che restano sostenibili per la famiglia.</p>
+    </div>
+
+    <div class="cap right" id="c3">
+      <div class="eyebrow">A bordo</div>
+      <h2>Una cabina che diventa reparto</h2>
+      <p>La barella aeronautica viene installata su due file di sedili in fondo alla cabina, isolata da una tenda divisoria. Il paziente viaggia disteso, in uno spazio riservato.</p>
+    </div>
+
+    <div class="cap left" id="c4">
+      <div class="eyebrow">Équipe</div>
+      <h2>Nessuno viaggia da solo</h2>
+      <p>Medico e infermiere accompagnano il paziente per l'intera durata del volo. Per i casi che non richiedono personale medico, un assistente sanitario dedicato.</p>
+    </div>
+
+    <div class="cap right" id="c5">
+      <div class="eyebrow">Monitoraggio</div>
+      <h2>Parametri sotto controllo, minuto per minuto</h2>
+      <p>Monitor multiparametrico, ossigeno e presidi di emergenza restano attivi dal decollo all'atterraggio.</p>
+    </div>
+
+    <div class="cap low" id="c6">
+      <div class="eyebrow">Bed to bed</div>
+      <h2>Dal letto d'ospedale al letto di casa</h2>
+      <p>Un unico interlocutore dalla dimissione all'estero fino alla consegna nel reparto di destinazione.</p>
+    </div>
+
+    <div class="hint" id="hint">
+      <span class="word">Scorri</span>
+      <span class="bar"></span>
+      <svg class="chev" viewBox="0 0 24 14" aria-hidden="true"><path d="M2 2l10 10L22 2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+</div>
+
+<svg class="ecg" viewBox="0 0 1400 56" preserveAspectRatio="none" aria-hidden="true">
+  <polyline points="0,28 240,28 262,28 272,10 282,46 292,22 302,28 560,28 582,28 592,10 602,46 612,22 622,28 880,28 902,28 912,10 922,46 932,22 942,28 1200,28 1222,28 1232,10 1242,46 1252,22 1262,28 1400,28"></polyline>
+</svg>
+
+<main>
+  <section id="percorso">
+    <div class="wrap">
+      <div class="kicker">Il percorso</div>
+      <h2 class="lead">Cinque passaggi, un solo interlocutore</h2>
+      <p class="sub">Un trasporto sanitario aereo non è un biglietto d'aereo. È una catena di autorizzazioni cliniche, tecniche e logistiche che deve reggere dall'inizio alla fine. Ce ne occupiamo noi, dal primo contatto alla consegna in reparto.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="n">01</div>
+          <div>
+            <h3>Valutazione clinica</h3>
+            <p>Raccogliamo la documentazione sanitaria e ci confrontiamo con il medico curante per stabilire l'idoneità al volo, la posizione di trasporto e il livello di assistenza necessario.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="n">02</div>
+          <div>
+            <h3>Clearance medica con la compagnia</h3>
+            <p>Predisponiamo il modulo MEDIF e gestiamo la pratica MEDA con il servizio medico della compagnia aerea, fino all'autorizzazione formale al trasporto.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="n">03</div>
+          <div>
+            <h3>Installazione della barella</h3>
+            <p>La barella aeronautica viene montata a terra su due file di sedili dedicate, nella parte posteriore della cabina, con tenda divisoria e ossigeno predisposto a bordo.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="n">04</div>
+          <div>
+            <h3>Volo assistito</h3>
+            <p>L'équipe resta al fianco del paziente per tutta la tratta: monitoraggio dei parametri vitali, terapia in corso, gestione del dolore e delle eventuali criticità in quota.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="n">05</div>
+          <div>
+            <h3>Consegna in reparto</h3>
+            <p>Ambulanza in attesa all'arrivo e trasferimento diretto nella struttura sanitaria di destinazione, con passaggio di consegne al personale che prende in carico il paziente.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="band">
+    <img src="__BAND__" alt="Ambulanza Life Care Italia in piazzale, sotto bordo, accanto all'aeromobile in sosta">
+  </div>
+
+  <section id="servizi">
+    <div class="wrap">
+      <div class="kicker">Servizi</div>
+      <h2 class="lead">Tre configurazioni, definite sul paziente</h2>
+      <p class="sub">Non esiste un trasporto standard. La composizione dell'équipe, la posizione a bordo e la rotta si decidono dopo aver letto la cartella clinica, non prima.</p>
+
+      <div class="cards">
+        <article class="card">
+          <figure><img src="__CARD2__" alt="Équipe LifeCare prende in carico la paziente in un reparto ospedaliero all'estero"><figcaption>Rimpatrio</figcaption></figure>
+          <div class="body">
+            <h3>Rimpatrio sanitario</h3>
+            <p>Dopo un infortunio o un ricovero all'estero, riportiamo il paziente in Italia sul primo volo di linea compatibile con le sue condizioni, coordinando ospedale di partenza, compagnia aerea e struttura di arrivo.</p>
+          </div>
+        </article>
+        <article class="card">
+          <figure><img src="__CARD1__" alt="Imbarco di una paziente barellata tramite ambulift sul portellone dell'aeromobile"><figcaption>Barellato</figcaption></figure>
+          <div class="body">
+            <h3>Trasporto barellato</h3>
+            <p>Per chi non può mantenere la posizione seduta. Barella aeronautica installata a bordo, spazio isolato dalla tenda divisoria, sistemi di fissaggio certificati e accesso riservato all'imbarco.</p>
+          </div>
+        </article>
+        <article class="card">
+          <figure><img src="__CARD3__" alt="Medico, infermiere e tecnico LifeCare al fianco della paziente prima del trasferimento"><figcaption>Assistenza</figcaption></figure>
+          <div class="body">
+            <h3>Équipe di accompagnamento</h3>
+            <p>Medico e infermiere per i quadri clinici che lo richiedono; assistente sanitario dedicato per i trasferimenti a minore complessità. La configurazione viene definita caso per caso.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="domande">
+    <div class="wrap">
+      <div class="kicker">Domande frequenti</div>
+      <h2 class="lead">Quello che ci chiedono per primo</h2>
+      <p class="sub">Chi ci chiama sta gestendo un'emergenza a distanza e ha bisogno di risposte prima ancora di un preventivo. Queste sono le quattro che tornano sempre.</p>
+
+      <div class="faq">
+        <div class="fq">
+          <h3>Quanto costa un trasporto sanitario?</h3>
+          <p>Dipende dalla tratta, dalla configurazione richiesta e dalla composizione dell'équipe. Una barella occupa più posti a bordo e incide sul costo molto più della distanza in sé. Il preventivo arriva prima di qualsiasi impegno.</p>
+        </div>
+        <div class="fq">
+          <h3>In quanto tempo si può partire?</h3>
+          <p>Il vincolo quasi mai è il volo: è l'autorizzazione medica della compagnia aerea, che richiede documentazione clinica aggiornata. Prima ci arrivano le carte, prima si parte.</p>
+        </div>
+        <div class="fq">
+          <h3>Chi decide se il paziente può volare?</h3>
+          <p>Il servizio medico della compagnia aerea, sulla base del modulo MEDIF compilato dal medico che ha in cura il paziente. Noi prepariamo la pratica, la presentiamo e la seguiamo fino all'autorizzazione.</p>
+        </div>
+        <div class="fq">
+          <h3>L'assicurazione copre il rimpatrio?</h3>
+          <p>Molte polizze viaggio e sanitarie lo prevedono, spesso a condizione che la centrale operativa dell'assicurazione autorizzi prima il trasporto. Conviene verificarlo subito: dopo, il rimborso diventa più difficile.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section id="preventivo">
+    <div class="wrap pgrid">
+      <div>
+        <div class="kicker">Preventivo</div>
+        <h2 class="lead">Diteci da dove e per dove</h2>
+        <p class="sub">Bastano le due tratte e un recapito. Vi richiamiamo con una prima valutazione di fattibilità, i tempi realistici e una stima dei costi. Nessun impegno.</p>
+      </div>
+
+      <div class="qwrap">
+      <div class="qbadge" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M6 2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm1 3v3h10V5H7zm0 5.5v2h2v-2H7zm4 0v2h2v-2h-2zm4 0v2h2v-2h-2zm-8 4v2h2v-2H7zm4 0v2h2v-2h-2zm4 0v4h2v-4h-2zm-8 4v2h2v-2H7zm4 0v2h2v-2h-2z"/></svg>
+      </div>
+      <div class="qcard">
+        <h3>Ottieni un preventivo</h3>
+        <p class="qsub">Inserisci le tratte, ti rispondiamo <b>il prima possibile</b></p>
+        <form id="lcForm" novalidate>
+          <div class="qfield">
+            <label for="q-from">Da dove partiamo?</label>
+            <div class="qinput">
+              <svg class="qicon blue" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c3.9 0 7 3.1 7 7 0 5.2-7 13-7 13S5 14.2 5 9c0-3.9 3.1-7 7-7zm0 4.5A2.5 2.5 0 1 0 12 11a2.5 2.5 0 0 0 0-4.5z"/></svg>
+              <input id="q-from" name="from" type="text" placeholder="Es. Hospital Universitario, Madrid" required>
+            </div>
+          </div>
+          <div class="qfield">
+            <label for="q-to">Dove andiamo?</label>
+            <div class="qinput">
+              <svg class="qicon green" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 2h1.6v20H5V2zm2.8 1.2h11.4l-2.3 4.2 2.3 4.2H7.8V3.2z"/></svg>
+              <input id="q-to" name="to" type="text" placeholder="Es. Policlinico Gemelli, Roma" required>
+            </div>
+          </div>
+          <div class="qrow">
+            <div class="qfield">
+              <label for="q-date">Data</label>
+              <div class="qinput"><input id="q-date" name="data" type="date" required></div>
+            </div>
+            <div class="qfield">
+              <label for="q-tel">Telefono</label>
+              <div class="qinput"><input id="q-tel" name="tel" type="tel" placeholder="Es. 333…" required></div>
+            </div>
+          </div>
+          <button type="submit">Ottieni il costo <span aria-hidden="true">&rarr;</span></button>
+          <p class="qnote" id="fnote">I dati servono solo a preparare il preventivo. Per le urgenze il telefono resta più rapido: 06 9838 0428.</p>
+        </form>
+      </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer id="contatti">
+  <div class="fgrid">
+    <div>
+      <div class="kicker">Contatti</div>
+      <h2>Se dovete riportare qualcuno a casa, chiamateci</h2>
+      <p class="sub">La centrale operativa risponde e apre subito la valutazione di fattibilità. Per le urgenze il telefono resta la via più rapida: al primo squillo c'è già qualcuno che sa cosa chiedervi.</p>
+    </div>
+    <div class="fcontact">
+      <div class="ctarow">
+        <a class="btn-primary" href="tel:0698380428">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.2.4 2.4.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.4c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.4 0 .8-.2 1l-2.2 2.2z"/></svg>
+          06 9838 0428
+        </a>
+        <a class="btn-ghost" href="mailto:centrale@lifecare-roma.it?subject=Richiesta%20trasporto%20sanitario">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5.5h18v13H3v-13zm1.8 1.5L12 12.4 19.2 7H4.8z"/></svg>
+          Scrivi alla centrale
+        </a>
+      </div>
+      <div class="contactlist">
+        <div>Centrale operativa · <a href="mailto:centrale@lifecare-roma.it">centrale@lifecare-roma.it</a></div>
+        <div>Attiva 24 ore su 24, 7 giorni su 7</div>
+      </div>
+    </div>
+  </div>
+  <div class="fbottom">
+    <div>© 2026 LifeCare Italia Medical Flights</div>
+  </div>
+</footer>
+
+<script>
+window.LC = [];
+window.LC_TOTAL = __TOTAL__;
+window.LC_CHUNKS = __CHUNKS__;
+(function(){
+  var fill=document.getElementById('ldFill'), pct=document.getElementById('ldPct'), done=0;
+  window.LC_p=function(){
+    done++;
+    var r=Math.min(1,done/window.LC_CHUNKS);
+    fill.style.width=(r*100).toFixed(1)+'%';
+    pct.textContent=(r<1?String(Math.round(r*100)).padStart(2,'0'):'100')+'%';
+  };
+})();
+</script>
+__FRAME_CHUNKS__
+<script>
+(function(){
+  var srcs=window.LC, N=srcs.length;
+  var imgs=new Array(N), ready=new Array(N).fill(false), decoded=0;
+  var cv=document.getElementById('seq'), ctx=cv.getContext('2d',{alpha:false});
+  var film=document.getElementById('film'), pin=film.querySelector('.pin');
+  var loader=document.getElementById('loader'), hint=document.getElementById('hint');
+  var hdr=document.getElementById('hdr'), vprog=document.getElementById('vprog');
+  var vfill=document.getElementById('vfill'), vnum=document.getElementById('vnum');
+  var caps=['c1','c2','c3','c4','c5','c6'].map(function(id){return document.getElementById(id)});
+  var ranges=[[0,.15],[.15,.33],[.33,.51],[.51,.68],[.68,.85],[.85,1]];
+  var cw=0,ch=0,last=-1,dirty=true,hidden=false;
+
+  function sizeCanvas(){
+    var dpr=Math.min(window.devicePixelRatio||1,2);
+    var w=Math.round(pin.clientWidth*dpr), h=Math.round(pin.clientHeight*dpr);
+    if(w!==cv.width||h!==cv.height){cv.width=w;cv.height=h;cw=w;ch=h;last=-1;dirty=true;}
+  }
+  function nearest(i){
+    if(ready[i])return i;
+    for(var d=1;d<N;d++){
+      if(i-d>=0&&ready[i-d])return i-d;
+      if(i+d<N&&ready[i+d])return i+d;
+    }
+    return -1;
+  }
+  function paint(i){
+    var k=nearest(i); if(k<0)return;
+    var img=imgs[k], iw=img.naturalWidth, ih=img.naturalHeight;
+    if(!iw)return;
+    var s=Math.max(cw/iw,ch/ih), dw=iw*s, dh=ih*s;
+    ctx.drawImage(img,(cw-dw)/2,(ch-dh)/2,dw,dh);
+    last=k;
+  }
+  function ease(t){return t<0?0:t>1?1:t}
+  function capOpacity(p,a,b,first){
+    var span=b-a, t=(p-a)/span;
+    if(t<0||t>1)return 0;
+    var fi=.22, fo=.80;
+    if(t<fi)return first?1:ease(t/fi);
+    if(t>fo)return ease((1-t)/(1-fo));
+    return 1;
+  }
+  function progress(){
+    var total=film.offsetHeight-window.innerHeight;
+    if(total<=0)return 0;
+    var top=film.getBoundingClientRect().top;
+    var p=-top/total;
+    return p<0?0:p>1?1:p;
+  }
+  function render(){
+    if(dirty){
+      dirty=false;
+      var p=progress();
+      var idx=Math.min(N-1,Math.round(p*(N-1)));
+      if(idx!==last)paint(idx);
+      for(var i=0;i<caps.length;i++){
+        var o=capOpacity(p,ranges[i][0],ranges[i][1],i===0);
+        var el=caps[i];
+        if(el._o!==o){
+          el._o=o;
+          el.style.opacity=o;
+          var y=(1-o)*10;
+          if(el.classList.contains('center'))el.style.transform='translate(-50%,calc(-50% + '+y+'px))';
+          else if(el.classList.contains('low'))el.style.transform='translate(-50%,'+y+'px)';
+          else el.style.transform='translateY(calc(-50% + '+y+'px))';
+        }
+      }
+      hint.style.opacity=p>.03?0:1;
+      vfill.style.height=(p*100)+'%';
+      vnum.textContent=String(Math.min(6,Math.floor(p*6)+1)).padStart(2,'0');
+      vprog.classList.toggle('on',p>.02&&p<.995);
+      hdr.classList.toggle('solid',window.scrollY>60);
+    }
+    requestAnimationFrame(render);
+  }
+  function mark(){dirty=true}
+
+  function hideLoader(){
+    if(hidden)return; hidden=true;
+    sizeCanvas(); paint(0); dirty=true;
+    loader.classList.add('gone');
+    setTimeout(function(){loader.style.display='none'},1000);
+  }
+
+  // decode frames progressively
+  srcs.forEach(function(src,i){
+    var im=new Image();
+    im.decoding='async';
+    im.onload=function(){
+      ready[i]=true; decoded++;
+      if(i===0||decoded===1)dirty=true;
+      if(decoded>=30)hideLoader();
+    };
+    im.onerror=function(){decoded++; if(decoded>=30)hideLoader();};
+    im.src=src;
+    imgs[i]=im;
+  });
+  setTimeout(function(){ if(ready[0]||decoded>0) hideLoader(); },4000);
+  setTimeout(hideLoader,9000);
+
+  sizeCanvas();
+  window.addEventListener('scroll',mark,{passive:true});
+  window.addEventListener('resize',function(){sizeCanvas();mark()});
+  requestAnimationFrame(render);
+
+  // smooth anchors
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.addEventListener('click',function(e){
+      var t=document.querySelector(a.getAttribute('href'));
+      if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'})}
+    });
+  });
+
+  // ---------------------------------------------------------------
+  // Modulo preventivo.
+  // Finché ENDPOINT resta vuoto, il pulsante apre il programma di posta
+  // dell'utente con la richiesta già compilata. Per ricevere le richieste
+  // direttamente, incollare qui sotto l'URL del servizio form (es. Formspree,
+  // "https://formspree.io/f/xxxxxxx"): da quel momento l'invio avviene senza
+  // uscire dal sito, e la posta resta come rete di sicurezza se la chiamata
+  // fallisce. Nota: sulla versione pubblicata come Artifact le chiamate verso
+  // domini esterni sono bloccate, quindi lì scatterà sempre la posta.
+  // ---------------------------------------------------------------
+  var ENDPOINT='';
+  var MAIL='centrale@lifecare-roma.it';
+  var form=document.getElementById('lcForm'), nota=document.getElementById('fnote');
+
+  function dati(f){
+    return {
+      partenza:f.from.value.trim(),
+      destinazione:f.to.value.trim(),
+      data:f.data.value||'da definire',
+      telefono:f.tel.value.trim()
+    };
+  }
+  function perPosta(d){
+    var corpo='Richiesta di preventivo — trasporto sanitario\n\n'
+      +'Partenza: '+d.partenza+'\n'
+      +'Destinazione: '+d.destinazione+'\n'
+      +'Data prevista: '+d.data+'\n'
+      +'Telefono: '+d.telefono+'\n\n'
+      +'Condizioni del paziente (aggiungere qui): ';
+    window.location.href='mailto:'+MAIL+'?subject='
+      +encodeURIComponent('Preventivo trasporto sanitario — '+d.partenza+' > '+d.destinazione)
+      +'&body='+encodeURIComponent(corpo);
+    nota.textContent='Abbiamo aperto il vostro programma di posta con la richiesta già compilata: premete Invia per inoltrarla alla centrale.';
+  }
+
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    var d=dati(e.target);
+    if(!d.partenza||!d.destinazione||!d.telefono){
+      nota.textContent='Servono partenza, destinazione e un recapito telefonico: senza quei tre dati non possiamo calcolare nulla.';
+      return;
+    }
+    if(!ENDPOINT){ perPosta(d); return; }
+
+    var bottone=form.querySelector('button');
+    bottone.disabled=true;
+    nota.textContent='Invio in corso…';
+    fetch(ENDPOINT,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify(d)
+    }).then(function(r){
+      if(!r.ok) throw new Error(r.status);
+      form.reset();
+      nota.textContent='Richiesta ricevuta. Vi richiamiamo appena possibile al numero che ci avete lasciato.';
+    }).catch(function(){
+      nota.textContent='Non siamo riusciti a inviare dal sito, apriamo la posta.';
+      perPosta(d);
+    }).then(function(){ bottone.disabled=false; });
+  });
+})();
+</script>

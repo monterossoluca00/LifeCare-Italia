@@ -1,0 +1,11 @@
+# output della compilazione destinato solo alla pubblicazione come Artifact
+site.html
+
+# anteprime e script usati durante lo sviluppo
+preview/
+bump.py
+fixmove.py
+shot.py
+
+__pycache__/
+.DS_Store

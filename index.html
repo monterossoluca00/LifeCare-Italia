@@ -13,7 +13,7 @@
 <meta property="og:description" content="Trasporto sanitario su voli di linea con barella aeronautica ed equipe medica a bordo. Rimpatri e trasferimenti a medio e lungo raggio, dal reparto di partenza a quello di destinazione.">
 <meta property="og:image" content="assets/og.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<title>Riportarli a casa</title>
+<title>LifeCare Italia — Rimpatri e voli sanitari con barella</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@300;400;600&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 :root{
@@ -480,7 +480,7 @@ footer{background:var(--ink-2);border-top:1px solid var(--line);padding:clamp(50
             </div>
           </div>
           <button type="submit">Ottieni il costo <span aria-hidden="true">&rarr;</span></button>
-          <p class="qnote" id="fnote">Il pulsante apre il vostro programma di posta con la richiesta già compilata verso centrale@lifecare-roma.it. Per ricevere le richieste direttamente sul sito serve collegare un servizio form: posso configurarlo io.</p>
+          <p class="qnote" id="fnote">I dati servono solo a preparare il preventivo. Per le urgenze il telefono resta più rapido: 06 9838 0428.</p>
         </form>
       </div>
       </div>
@@ -661,25 +661,65 @@ window.LC_CHUNKS = 16;
     });
   });
 
-  // quote form -> mailto to the operations desk
-  document.getElementById('lcForm').addEventListener('submit',function(e){
+  // ---------------------------------------------------------------
+  // Modulo preventivo.
+  // Finché ENDPOINT resta vuoto, il pulsante apre il programma di posta
+  // dell'utente con la richiesta già compilata. Per ricevere le richieste
+  // direttamente, incollare qui sotto l'URL del servizio form (es. Formspree,
+  // "https://formspree.io/f/xxxxxxx"): da quel momento l'invio avviene senza
+  // uscire dal sito, e la posta resta come rete di sicurezza se la chiamata
+  // fallisce. Nota: sulla versione pubblicata come Artifact le chiamate verso
+  // domini esterni sono bloccate, quindi lì scatterà sempre la posta.
+  // ---------------------------------------------------------------
+  var ENDPOINT='';
+  var MAIL='centrale@lifecare-roma.it';
+  var form=document.getElementById('lcForm'), nota=document.getElementById('fnote');
+
+  function dati(f){
+    return {
+      partenza:f.from.value.trim(),
+      destinazione:f.to.value.trim(),
+      data:f.data.value||'da definire',
+      telefono:f.tel.value.trim()
+    };
+  }
+  function perPosta(d){
+    var corpo='Richiesta di preventivo — trasporto sanitario\n\n'
+      +'Partenza: '+d.partenza+'\n'
+      +'Destinazione: '+d.destinazione+'\n'
+      +'Data prevista: '+d.data+'\n'
+      +'Telefono: '+d.telefono+'\n\n'
+      +'Condizioni del paziente (aggiungere qui): ';
+    window.location.href='mailto:'+MAIL+'?subject='
+      +encodeURIComponent('Preventivo trasporto sanitario — '+d.partenza+' > '+d.destinazione)
+      +'&body='+encodeURIComponent(corpo);
+    nota.textContent='Abbiamo aperto il vostro programma di posta con la richiesta già compilata: premete Invia per inoltrarla alla centrale.';
+  }
+
+  form.addEventListener('submit',function(e){
     e.preventDefault();
-    var f=e.target;
-    var from=f.from.value.trim(), to=f.to.value.trim();
-    if(!from||!to||!f.tel.value.trim()){
-      document.getElementById('fnote').textContent='Compilate partenza, destinazione e telefono: senza quei tre dati non possiamo calcolare nulla.';
+    var d=dati(e.target);
+    if(!d.partenza||!d.destinazione||!d.telefono){
+      nota.textContent='Servono partenza, destinazione e un recapito telefonico: senza quei tre dati non possiamo calcolare nulla.';
       return;
     }
-    var body='Richiesta di preventivo — trasporto sanitario\n\n'
-      +'Partenza: '+from+'\n'
-      +'Destinazione: '+to+'\n'
-      +'Data prevista: '+(f.data.value||'da definire')+'\n'
-      +'Telefono: '+f.tel.value+'\n\n'
-      +'Condizioni del paziente (aggiungere qui): ';
-    window.location.href='mailto:centrale@lifecare-roma.it?subject='
-      +encodeURIComponent('Preventivo trasporto sanitario — '+from+' > '+to)
-      +'&body='+encodeURIComponent(body);
-    document.getElementById('fnote').textContent='Abbiamo aperto il vostro programma di posta con la richiesta già compilata: premete Invia per inoltrarla alla centrale.';
+    if(!ENDPOINT){ perPosta(d); return; }
+
+    var bottone=form.querySelector('button');
+    bottone.disabled=true;
+    nota.textContent='Invio in corso…';
+    fetch(ENDPOINT,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify(d)
+    }).then(function(r){
+      if(!r.ok) throw new Error(r.status);
+      form.reset();
+      nota.textContent='Richiesta ricevuta. Vi richiamiamo appena possibile al numero che ci avete lasciato.';
+    }).catch(function(){
+      nota.textContent='Non siamo riusciti a inviare dal sito, apriamo la posta.';
+      perPosta(d);
+    }).then(function(){ bottone.disabled=false; });
   });
 })();
 </script>
