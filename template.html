@@ -24,16 +24,6 @@ p{margin:0}
 a{color:inherit}
 :focus-visible{outline:2px solid var(--vital);outline-offset:3px;border-radius:2px}
 
-/* ---------- LOADER ---------- */
-#loader{position:fixed;inset:0;z-index:999;background:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;transition:opacity .9s ease,visibility .9s}
-#loader.gone{opacity:0;visibility:hidden}
-.ld-mark{font-family:var(--serif);font-size:clamp(30px,5vw,50px);letter-spacing:.01em}
-.ld-mark b{font-weight:600;color:var(--blue)}
-.ld-mark span{color:var(--paper);font-weight:300}
-.ld-sub{font-family:var(--mono);font-size:12px;letter-spacing:.34em;text-transform:uppercase;color:var(--mute)}
-.ld-rail{width:min(300px,62vw);height:2px;background:rgba(143,184,242,.14);overflow:hidden}
-.ld-fill{height:100%;width:0;background:var(--vital);transition:width .25s linear}
-.ld-pct{font-family:var(--mono);font-size:13px;color:var(--mute);letter-spacing:.16em;font-variant-numeric:tabular-nums}
 
 /* ---------- HEADER ---------- */
 header{position:fixed;top:0;left:0;right:0;z-index:80;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:20px clamp(18px,4vw,44px);transition:background .4s ease,backdrop-filter .4s ease,border-color .4s ease;border-bottom:1px solid transparent}
@@ -235,13 +225,6 @@ footer{background:var(--ink-2);border-top:1px solid var(--line);padding:clamp(50
   .cta{font-size:13.5px;padding:11px 14px;letter-spacing:0}
 }
 </style>
-
-<div id="loader">
-  <div class="ld-mark"><b>LifeCare</b> <span>Italia</span></div>
-  <div class="ld-sub">Medical Flight</div>
-  <div class="ld-rail"><div class="ld-fill" id="ldFill"></div></div>
-  <div class="ld-pct" id="ldPct">00%</div>
-</div>
 
 <header id="hdr">
   <a class="logo" href="#film"><b>LifeCare</b> Italia<i>Medical Flight</i></a>
@@ -502,16 +485,6 @@ footer{background:var(--ink-2);border-top:1px solid var(--line);padding:clamp(50
 <script>
 window.LC = [];
 window.LC_TOTAL = __TOTAL__;
-window.LC_CHUNKS = __CHUNKS__;
-(function(){
-  var fill=document.getElementById('ldFill'), pct=document.getElementById('ldPct'), done=0;
-  window.LC_p=function(){
-    done++;
-    var r=Math.min(1,done/window.LC_CHUNKS);
-    fill.style.width=(r*100).toFixed(1)+'%';
-    pct.textContent=(r<1?String(Math.round(r*100)).padStart(2,'0'):'100')+'%';
-  };
-})();
 </script>
 __FRAME_CHUNKS__
 <script>
@@ -520,7 +493,7 @@ __FRAME_CHUNKS__
   var imgs=new Array(N), ready=new Array(N).fill(false), decoded=0;
   var cv=document.getElementById('seq'), ctx=cv.getContext('2d',{alpha:false});
   var film=document.getElementById('film'), pin=film.querySelector('.pin');
-  var loader=document.getElementById('loader'), hint=document.getElementById('hint');
+  var hint=document.getElementById('hint');
   var hdr=document.getElementById('hdr'), vprog=document.getElementById('vprog');
   var vfill=document.getElementById('vfill'), vnum=document.getElementById('vnum');
   var caps=['c1','c2','c3','c4','c5','c6'].map(function(id){return document.getElementById(id)});
@@ -592,11 +565,9 @@ __FRAME_CHUNKS__
   }
   function mark(){dirty=true}
 
-  function hideLoader(){
+  function primoDisegno(){
     if(hidden)return; hidden=true;
     sizeCanvas(); paint(0); dirty=true;
-    loader.classList.add('gone');
-    setTimeout(function(){loader.style.display='none'},1000);
   }
 
   // decode frames progressively
@@ -606,14 +577,13 @@ __FRAME_CHUNKS__
     im.onload=function(){
       ready[i]=true; decoded++;
       if(i===0||decoded===1)dirty=true;
-      if(decoded>=30)hideLoader();
+      if(decoded>=1)primoDisegno();
     };
-    im.onerror=function(){decoded++; if(decoded>=30)hideLoader();};
+    im.onerror=function(){decoded++; if(decoded>=1)primoDisegno();};
     im.src=src;
     imgs[i]=im;
   });
-  setTimeout(function(){ if(ready[0]||decoded>0) hideLoader(); },4000);
-  setTimeout(hideLoader,9000);
+  setTimeout(primoDisegno,4000);
 
   sizeCanvas();
   window.addEventListener('scroll',mark,{passive:true});

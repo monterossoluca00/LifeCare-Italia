@@ -3,14 +3,15 @@ Compila il sito LifeCare Italia Medical Flights.
 
 Produce due file dallo stesso sorgente `template.html`:
 
-  site.html   frammento senza <head>: è quello che si pubblica come Artifact,
-              dove l'involucro del documento viene aggiunto dalla piattaforma
-  index.html  documento HTML completo e autonomo, con dichiarazione di codifica,
-              viewport e meta per i social: è quello che serve a GitHub Pages
+  site.html   frammento senza <head> per l'Artifact, con TUTTI gli asset
+              incorporati come data URI: un file solo, nessuna dipendenza
+  index.html  documento completo per il sito pubblicato, che carica frame e
+              immagini come FILE SEPARATI da frames/ e cards/
 
-Tutti gli asset (124 frame + 3 immagini servizi + banda) vengono incorporati
-come data URI, quindi il sito è un unico file senza dipendenze esterne
-(a parte i font di Google).
+La differenza conta: incorporare 124 frame in base64 porta index.html a 7 MB,
+che il visitatore deve scaricare per intero prima di vedere qualsiasi cosa e
+che il browser non può mettere in cache immagine per immagine. Con i file
+separati la pagina pesa una quarantina di KB e le immagini arrivano dopo.
 
 Uso:  python3 build.py
 """
@@ -28,35 +29,45 @@ def b64(percorso, mime=None):
     return "data:%s;base64,%s" % (mime, base64.b64encode(open(percorso, "rb").read()).decode())
 
 
-# ---- frame dell'animazione, divisi in blocchi per la barra di caricamento ----
+# ---- composizione ----
 frames = sorted(glob.glob("frames/f_*.webp"))
 assert len(frames) == 124, "attesi 124 frame, trovati %d" % len(frames)
-uris = [b64(f) for f in frames]
 
 BLOCCO = 8
-blocchi = [uris[i:i + BLOCCO] for i in range(0, len(uris), BLOCCO)]
-script_frame = "\n".join(
-    "<script>LC.push(%s);LC_p();</script>" % ",".join(json.dumps(u) for u in b)
-    for b in blocchi
-)
 
-# ---- sostituzioni nel template ----
-html = open("template.html", encoding="utf-8").read()
-html = html.replace("__TOTAL__", str(len(uris)))
-html = html.replace("__CHUNKS__", str(len(blocchi)))
-html = html.replace("__CARD1__", b64("cards/c1.webp"))
-html = html.replace("__CARD2__", b64("cards/c2.webp"))
-html = html.replace("__CARD3__", b64("cards/c3.webp"))
-html = html.replace("__BAND__", b64("cards/band.webp"))
-html = html.replace("__FRAME_CHUNKS__", script_frame)
-assert "__" not in html.split("<script>")[0], "e' rimasto un segnaposto non sostituito"
+
+def componi(uris, card1, card2, card3, band):
+    """Riempie il template con le sorgenti date: data URI oppure percorsi."""
+    blocchi = [uris[i:i + BLOCCO] for i in range(0, len(uris), BLOCCO)]
+    script_frame = "\n".join(
+        "<script>LC.push(%s);</script>" % ",".join(json.dumps(u) for u in b)
+        for b in blocchi
+    )
+    html = open("template.html", encoding="utf-8").read()
+    html = html.replace("__TOTAL__", str(len(uris)))
+    html = html.replace("__CARD1__", card1)
+    html = html.replace("__CARD2__", card2)
+    html = html.replace("__CARD3__", card3)
+    html = html.replace("__BAND__", band)
+    html = html.replace("__FRAME_CHUNKS__", script_frame)
+    assert "__" not in html.split("<script>")[0], "e' rimasto un segnaposto non sostituito"
+    return html
+
+
+# versione autonoma: tutto incorporato
+html = componi([b64(f) for f in frames], b64("cards/c1.webp"), b64("cards/c2.webp"),
+               b64("cards/c3.webp"), b64("cards/band.webp"))
+
+# versione collegata: i file restano file
+html_collegato = componi(frames, "cards/c1.webp", "cards/c2.webp",
+                         "cards/c3.webp", "cards/band.webp")
 
 # ---- versione Artifact ----
 open("site.html", "w", encoding="utf-8").write(html)
 
 # ---- versione autonoma per GitHub Pages ----
-taglio = html.index("</style>") + len("</style>")
-testa, corpo = html[:taglio], html[taglio:]
+taglio = html_collegato.index("</style>") + len("</style>")
+testa, corpo = html_collegato[:taglio], html_collegato[taglio:]
 
 FAVICON = (
     "data:image/svg+xml,"
@@ -80,6 +91,7 @@ documento = """<!doctype html>
 <meta property="og:description" content="{desc}">
 <meta property="og:image" content="assets/og.jpg">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="preload" as="image" href="frames/f_001.webp">
 {testa}
 </head>
 <body>
@@ -90,6 +102,6 @@ documento = """<!doctype html>
 
 open("index.html", "w", encoding="utf-8").write(documento)
 
-print("frame: %d  blocchi: %d" % (len(uris), len(blocchi)))
+print("frame: %d" % len(frames))
 for f in ("site.html", "index.html"):
     print("%-11s %.2f MB" % (f, os.path.getsize(f) / 1024 / 1024))
