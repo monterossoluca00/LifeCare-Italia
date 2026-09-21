@@ -28,26 +28,32 @@ sovrascritto a ogni compilazione.
 python3 build.py
 ```
 
-Il comando produce `index.html` (documento completo, per GitHub Pages) e
-`site.html` (variante senza `<head>`, usata solo per la pubblicazione come
-Artifact su claude.ai; non è versionata).
+Il comando produce due file diversi dallo stesso template:
+
+- `index.html` — documento completo per GitHub Pages, **40 KB**, carica frame e
+  immagini come file da `frames/` e `cards/`;
+- `site.html` — variante senza `<head>` per l'Artifact su claude.ai, **6,7 MB**,
+  con tutti gli asset incorporati come data URI. Non è versionata.
 
 Serve Python 3 con la libreria standard: nessuna dipendenza da installare.
 
 ## Come è fatta l'animazione
 
-I fotogrammi non vengono caricati da file separati ma incorporati nella pagina
-come data URI, divisi in 16 blocchi `<script>` consecutivi. Il browser li esegue
-man mano che scarica il documento, quindi **la barra della schermata di
-caricamento misura l'avanzamento reale del download**, non un'animazione finta.
+I 124 fotogrammi finiscono in `window.LC` tramite blocchi `<script>` consecutivi,
+ma **cosa contengono quei blocchi dipende dalla versione**:
+
+- in `index.html` sono **percorsi** a `frames/*.webp`, quindi il browser scarica le
+  immagini come file separati, in parallelo e mettendole in cache;
+- in `site.html` sono **data URI**, perché l'Artifact non può caricare file esterni.
 
 Il canvas viene ridisegnato con `requestAnimationFrame` a ogni variazione dello
 scroll, in modalità *cover* (l'immagine riempie sempre lo schermo). Se il
 fotogramma richiesto non è ancora decodificato viene disegnato il più vicino
 disponibile, così non compaiono mai buchi neri durante lo scorrimento.
 
-La schermata di caricamento sparisce dopo 30 fotogrammi decodificati, con due
-reti di sicurezza: 4 secondi e, in ultima istanza, 9 secondi.
+**Non c'è nessuna schermata di caricamento.** C'era, e aspettava 30 fotogrammi prima
+di scoprire la pagina: con i file separati non serviva più — il primo fotogramma è in
+`<link rel="preload">` nell'head e il canvas viene disegnato appena è decodificato.
 
 ## Pubblicazione su GitHub Pages
 
